@@ -1,0 +1,24 @@
+doctype html
+html(style='overflow-y: hidden;')
+    head
+        title OnlineOS
+        block framework_css
+        link(rel='icon' href='/images/favicon.png')
+        link(rel='stylesheet', href='/stylesheets/style.css')
+
+    body(style='margin: 0; padding: 0;')
+        div(class='container-fluid')
+            div(class='row')
+                div(class='col-12 desktop-container')
+                    div(class='desktop-body')
+                    div(class='task-bar')
+                        div(class='logo icon')
+                        div(class='apps-launcher')
+                        div(class='hour')
+                    div(class='start-menu hide')
+                        div(class='settings icon fa fa-user-cog')
+                        div(class='logo icon')
+                    div(class='window-container')
+        block framework_js
+        script(src='/javascripts/script.js')
+
