@@ -383,7 +383,7 @@ function create_system_window(callback, window_type = 'void') {
 			}
 			else {
 				_window.style.cursor = 'default';
-				_window.querySelector('.window-body').removeEventListener('mousemove', on_mouse_move);
+				// _window.querySelector('.window-body').removeEventListener('mousemove', on_mouse_move);
 			}
 
 			let direction = _window.getAttribute('data-direction');
@@ -397,10 +397,8 @@ function create_system_window(callback, window_type = 'void') {
 					diff = e.offsetX - parseInt(_window.getAttribute('data-old_mouse_x'));
 					diff = diff > 0 ? 1 : -1;
 
-					_window.style.width = current_width + diff + 'px';
-					console.log(_window.style.left);
-					_window.style.left = window.offsetLeft - diff + 'px';
-					console.log(_window.style.left);
+					_window.style.width = current_width - diff + 'px';
+					_window.style.left = _window.offsetLeft + diff + 'px';
 					break;
 				case 'right':
 					console.log('right');
@@ -412,11 +410,12 @@ function create_system_window(callback, window_type = 'void') {
 					_window.style.right = parseInt(current_right) - diff + 'px';
 					break;
 				case 'bottom':
-					console.log('bottom');
+					// console.log('bottom');
 					diff = e.layerY - parseInt(_window.getAttribute('data-old_mouse_y'));
 					diff = diff > 0 ? 1 : -1;
 
 					_window.style.height = current_height + diff + 'px';
+					console.log(current_height + diff + 'px');
 					break;
 				default:
 					break;
