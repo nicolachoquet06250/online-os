@@ -482,7 +482,7 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 				let move_cursor_marge = 45;
 
 				if (mouse_x < move_cursor_marge || mouse_x > _window.offsetWidth - move_cursor_marge) {
-					iframe.style.cursor = 'col-resize';
+					// _window.cursor = 'col-resize';
 					if (mouse_x < move_cursor_marge) {
 						// left
 						iframe.contentWindow.addEventListener('mousedown', position => {
@@ -506,7 +506,7 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 						});
 					}
 				} else if (mouse_y > _window.offsetHeight - move_cursor_marge) {
-					iframe.style.cursor = 'row-resize';
+					// iframe.style.cursor = 'row-resize';
 					if (mouse_y > _window.offsetWidth - move_cursor_marge) {
 						// bottom
 						iframe.contentWindow.addEventListener('mousedown', position => {
@@ -518,10 +518,7 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 							_window.removeAttribute('data-direction');
 						});
 					}
-				} else {
-					iframe.style.cursor = 'default';
-					// _window.querySelector('.window-body').removeEventListener('mousemove', on_mouse_move);
-				}
+				} else iframe.style.cursor = 'default';
 
 				let direction = _window.getAttribute('data-direction');
 
