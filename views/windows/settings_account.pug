@@ -16,14 +16,12 @@ html(style='overflow-y: hidden;')
     body(style='margin: 0; padding: 0; background: aliceblue; padding-top: 10px;')
         div(class='container-fluid')
             div(class='row')
-                div(class='col-3 text-center setting-icon pt-2')
-                    i(class='fa fa-newspaper', style='font-size: 40px;')
-                    br
-                    span Menu Démarrer
-                div(class='col-3 text-center setting-icon pt-2', onclick='window.location.href="/settings/me"')
-                    i(class='fa fa-user', style='font-size: 40px;')
-                    br
-                    span Mon compte
+                div(class='col-12 text-center')
+                    i(class='fa fa-arrow-left',
+                        style='position: absolute; left: 25px; top: 10px; cursor: pointer;',
+                        title='Paramèttres',
+                        onclick='window.history.back();')
+                    h2(style='cursor: default;') Mon compte
 
         script(src='https://code.jquery.com/jquery-3.3.1.min.js')
         script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js',

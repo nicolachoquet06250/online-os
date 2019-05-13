@@ -1,5 +1,10 @@
 'use strict';
 
+const WINDOW_TYPE = {
+	VOID: 'void',
+	SETTINGS: 'settings'
+};
+
 function get_window_type(type) {
 	let types = {
 		void: null,
@@ -13,6 +18,7 @@ function get_window_type(type) {
 	if(type && types[type]) {
 		return types[type];
 	}
+	return null;
 }
 
 function add_desktop_wallpaper(url) {
@@ -33,6 +39,14 @@ function init_desktop() {
 	(() => {
 		size_desktop();
 		window.addEventListener('resize', size_desktop);
+
+		document.querySelectorAll('.window-starter').forEach(window_starter => {
+			window_starter.addEventListener('click', () => {
+				let constant = window_starter.getAttribute('data-window_name_constant');
+				create_system_window(() => console.log('`' + constant + '` window has been opened !'),
+					constant);
+			});
+		});
 	})();
 }
 
@@ -46,10 +60,6 @@ function hide_start_menu() {
 
 function init_start_menu() {
 	document.querySelector('.start-menu .logo').addEventListener('click', () => hide_start_menu());
-	document.querySelector('.start-menu .settings').addEventListener('click', () => {
-		hide_start_menu();
-		create_system_window(undefined, 'settings');
-	});
 }
 
 function init_task_bar() {
@@ -75,11 +85,132 @@ function init_task_bar() {
 
 }
 
-function create_system_window(callback, window_type = 'void') {
-	let center_window = _window => {
-		_window.style.top = ((window.innerHeight - parseInt(_window.style.height.replace('px', ''))) / 2) + 'px';
-		_window.style.left = ((window.innerWidth - parseInt(_window.style.height.replace('px', ''))) / 2) + 'px';
+function create_error_window(callback, message, title) {
+	let create_top_bar = (_window, title) => {
+		let create_logo = (_window, logo, url, title, callback) => {
+			logo.style.position = 'absolute';
+			logo.style.left = '0';
+
+			let img = document.createElement('img');
+			img.style.height = '40px';
+			img.style.width = '40px';
+			img.style.textAlign = 'center';
+			img.style.cursor = 'default';
+			img.src = url;
+			if (callback !== undefined) {
+				img.addEventListener('click', () => callback(_window));
+			}
+
+			let title_txt = document.createElement('span');
+			title_txt.style.fontSize = '15px';
+			title_txt.style.marginLeft = '15px';
+			title_txt.style.cursor = 'default';
+			title_txt.innerHTML = title;
+
+			logo.append(img);
+			logo.append(title_txt);
+		};
+		let create_close_btn = (_window, buttons, callback, title) => {
+			let close_btn = document.createElement('div');
+			close_btn.style.height = '40px';
+			close_btn.style.width = '40px';
+			close_btn.style.paddingTop = '10px';
+			close_btn.style.textAlign = 'center';
+			close_btn.style.fontSize = '20px';
+			close_btn.style.cursor = 'pointer';
+			close_btn.classList.add('fa');
+			close_btn.classList.add('fa-times');
+			close_btn.addEventListener('mouseover', () => {
+				close_btn.style.backgroundColor = 'red';
+			});
+			close_btn.addEventListener('mouseout', () => {
+				close_btn.style.backgroundColor = 'transparent';
+			});
+			close_btn.addEventListener('click', () => callback(_window, title));
+
+			buttons.append(close_btn);
+		};
+
+		let top_bar = document.createElement('div');
+		top_bar.classList.add('top-bar');
+
+		let buttons = document.createElement('div');
+		buttons.classList.add('buttons');
+
+		let logo = document.createElement('div');
+
+		create_logo(_window, logo, '/images/error.jpg', title);
+		create_close_btn(_window, buttons, close_system_window, title);
+
+		top_bar.append(logo);
+		top_bar.append(buttons);
+		_window.append(top_bar);
+
+		let callback_mousemove = e => {
+			let mouse_X = e.pageX;
+			let mouse_Y = e.pageY;
+
+			let window_X = _window.offsetLeft;
+			let window_Y = _window.offsetTop;
+
+			if(top_bar.hasAttribute('data-mouse_x') && top_bar.hasAttribute('data-mouse_y')) {
+				let old_mouse_x = top_bar.getAttribute('data-mouse_x');
+				let old_mouse_y = top_bar.getAttribute('data-mouse_y');
+
+				let current_mouse_x = mouse_X;
+				let current_mouse_y = mouse_Y;
+
+				let diff_x = current_mouse_x - old_mouse_x;
+				let diff_y = current_mouse_y - old_mouse_y;
+
+				_window.style.top = window_Y + diff_y + 'px';
+				_window.style.left = window_X + diff_x + 'px';
+			}
+			top_bar.setAttribute('data-mouse_x', mouse_X);
+			top_bar.setAttribute('data-mouse_y', mouse_Y);
+		};
+
+		top_bar.addEventListener('mousedown', () => top_bar.addEventListener('mousemove', callback_mousemove));
+
+		top_bar.addEventListener('mouseup', () => {
+			top_bar.removeAttribute('data-mouse_X');
+			top_bar.removeAttribute('data-mouse_Y');
+			top_bar.removeEventListener('mousemove', callback_mousemove);
+		});
 	};
+	let create_window_body = (_window, title, message) => {
+		let body = document.createElement('div');
+		body.classList.add('window-body');
+		body.style.overflow = 'auto';
+		body.style.padding = '10px';
+		body.innerHTML = '<h2>' + title + '</h2>' +
+			'<p style="color: red;"><img src="/images/error.jpg" style="width: 50px; height: 50px;"> <span>' + message + '</span></p>';
+		_window.append(body);
+	};
+
+	((callback, title, message) => {
+		let window_container = document.querySelector('.window-container');
+		let _window = document.createElement('div');
+		_window.classList.add('window');
+		_window.classList.add('error');
+		_window.style.position = 'absolute';
+		_window.style.resize = 'both';
+		_window.style.width = '400px';
+		_window.style.height = '200px';
+		_window.style.border = '1px solid red';
+		center_system_window(_window);
+		create_top_bar(_window, title);
+		create_window_body(_window, title, message);
+
+		window_container.append(_window);
+		window.addEventListener('resize', () => center_system_window(_window));
+		if(callback !== undefined) {
+			callback();
+		}
+	})(callback, title, message);
+}
+
+function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 	let insert_app_into_task_bar = (_window, url_logo, title) => {
 		let create_id_for_app_card = (title, i = 0) => {
 			if(i > 0) {
@@ -151,7 +282,7 @@ function create_system_window(callback, window_type = 'void') {
 		app_card.append(app_card_title);
 
 		app_card.addEventListener('click', () =>
-			_window.classList.contains('minimized') ? unminimize_system_window(_window) : minimize_system_window(_window));
+			_window.classList.contains('minimized') ? un_minimize_system_window(_window) : minimize_system_window(_window));
 
 		document.querySelector('.task-bar .apps-launcher').append(app_card);
 	};
@@ -187,6 +318,7 @@ function create_system_window(callback, window_type = 'void') {
 			let title_txt = document.createElement('span');
 			title_txt.style.fontSize = '15px';
 			title_txt.style.cursor = 'default';
+			title_txt.style.marginLeft = '15px';
 			title_txt.innerHTML = title;
 
 			logo.append(img);
@@ -266,7 +398,7 @@ function create_system_window(callback, window_type = 'void') {
 		create_logo(_window, logo, window_type.logo, title);
 		create_minimize_btn(_window, buttons, minimize_system_window, title);
 		create_maximize_btn(_window, buttons, _window =>
-			_window.classList.contains('maximized') ? unmaximize_system_window(_window) : maximize_system_window(_window), title);
+			_window.classList.contains('maximized') ? un_maximize_system_window(_window) : maximize_system_window(_window), title);
 		create_close_btn(_window, buttons, close_system_window, title);
 
 		top_bar.append(logo);
@@ -311,127 +443,133 @@ function create_system_window(callback, window_type = 'void') {
 		let body = document.createElement('div');
 		body.setAttribute('href', window_type.url);
 		body.classList.add('window-body');
-		let type_url_source = '';
-		$.ajax({
-			url: window_type.url,
-			type: 'get',
-			async: false
-		}).done(data => {
-			type_url_source = data;
-		});
-		body.innerHTML = type_url_source;
+		body.innerHTML = '<iframe src="' + window_type.url + '" style="width: 100%; height: 100%; border: none;" />';
+
 		_window.append(body);
 	};
 
-	((callback, window_type) => {
-		let window_container = document.querySelector('.window-container');
-		let _window = document.createElement('div');
-		_window.classList.add('window');
-		_window.style.position = 'absolute';
-		_window.style.resize = 'both';
-		_window.style.width = '500px';
-		_window.style.height = '500px';
-		_window.style.border = '1px solid black';
-		center_window(_window);
-		create_top_bar(_window, window_type);
-		create_window_body(_window, window_type);
+	let _window_type = get_window_type(window_type);
 
-		function on_mouse_move(e) {
-			let mouse_x = e.layerX;
-			let mouse_y = e.layerY;
+	if(_window_type === null) {
+		create_error_window(undefined,
+			'Vous cherchez à lancer l\'application \'' + window_type + '\' mais elle n\'existe pas !',
+			'Application non trouvée');
+	}
+	else {
+		((callback, window_type) => {
+			let window_container = document.querySelector('.window-container');
+			let _window = document.createElement('div');
+			_window.classList.add('window');
+			_window.style.position = 'absolute';
+			_window.style.resize = 'both';
+			_window.style.width = '500px';
+			_window.style.height = '500px';
+			_window.style.border = '1px solid black';
+			center_system_window(_window);
+			create_top_bar(_window, window_type);
+			create_window_body(_window, window_type);
 
-			let move_cursor_marge = 45;
+			function on_mouse_move(e) {
+				let mouse_x = e.layerX;
+				let mouse_y = e.layerY;
 
-			if(mouse_x < move_cursor_marge || mouse_x > _window.offsetWidth - move_cursor_marge) {
-				_window.style.cursor = 'col-resize';
-				if(mouse_x < move_cursor_marge) {
-					// left
-					_window.addEventListener('mousedown', position => {
-						_window.setAttribute('data-old_mouse_x', position.offsetX.toString());
-						_window.setAttribute('data-direction', 'left');
-					});
-					_window.addEventListener('mouseup', () => {
-						_window.removeAttribute('data-old_mouse_x');
-						_window.removeAttribute('data-direction');
-					});
+				let move_cursor_marge = 45;
+
+				if (mouse_x < move_cursor_marge || mouse_x > _window.offsetWidth - move_cursor_marge) {
+					_window.style.cursor = 'col-resize';
+					if (mouse_x < move_cursor_marge) {
+						// left
+						_window.addEventListener('mousedown', position => {
+							_window.setAttribute('data-old_mouse_x', position.offsetX.toString());
+							_window.setAttribute('data-direction', 'left');
+						});
+						_window.addEventListener('mouseup', () => {
+							_window.removeAttribute('data-old_mouse_x');
+							_window.removeAttribute('data-direction');
+						});
+					} else if (mouse_x > _window.offsetWidth - move_cursor_marge) {
+						// right
+						_window.addEventListener('mousedown', position => {
+							_window.setAttribute('data-old_mouse_x', position.layerX.toString());
+							_window.setAttribute('data-direction', 'right');
+						});
+						_window.addEventListener('mouseup', () => {
+							_window.removeAttribute('data-old_mouse_x');
+							_window.removeAttribute('data-direction');
+						});
+					}
+				} else if (mouse_y > _window.offsetHeight - move_cursor_marge) {
+					_window.style.cursor = 'row-resize';
+					if (mouse_y > _window.offsetWidth - move_cursor_marge) {
+						// bottom
+						_window.addEventListener('mousedown', position => {
+							_window.setAttribute('data-old_mouse_y', position.layerY.toString());
+							_window.setAttribute('data-direction', 'bottom');
+						});
+						_window.addEventListener('mouseup', () => {
+							_window.removeAttribute('data-old_mouse_y');
+							_window.removeAttribute('data-direction');
+						});
+					}
+				} else {
+					_window.style.cursor = 'default';
+					// _window.querySelector('.window-body').removeEventListener('mousemove', on_mouse_move);
 				}
-				else if (mouse_x > _window.offsetWidth - move_cursor_marge) {
-					// right
-					_window.addEventListener('mousedown', position => {
-						_window.setAttribute('data-old_mouse_x', position.layerX.toString());
-						_window.setAttribute('data-direction', 'right');
-					});
-					_window.addEventListener('mouseup', () => {
-						_window.removeAttribute('data-old_mouse_x');
-						_window.removeAttribute('data-direction');
-					});
+
+				let direction = _window.getAttribute('data-direction');
+
+				let diff;
+				let current_height = _window.offsetHeight;
+				let current_width = _window.offsetWidth;
+				switch (direction) {
+					case 'left':
+						// console.log('left');
+						diff = e.offsetX - parseInt(_window.getAttribute('data-old_mouse_x'));
+						diff = diff > 0 ? 1 : -1;
+
+						_window.style.width = current_width - diff + 'px';
+						_window.style.left = _window.offsetLeft + diff + 'px';
+						break;
+					case 'right':
+						// console.log('right');
+						diff = e.layerX - parseInt(_window.getAttribute('data-old_mouse_x'));
+						diff = diff > 0 ? 1 : -1;
+
+						_window.style.width = current_width + diff + 'px';
+						let current_right = _window.style.right.replace('px', '') === '' ? _window.style.left.replace('px', '') : _window.style.right.replace('px', '');
+						_window.style.right = parseInt(current_right) - diff + 'px';
+						break;
+					case 'bottom':
+						// console.log('bottom');
+						diff = e.layerY - parseInt(_window.getAttribute('data-old_mouse_y'));
+						diff = diff > 0 ? 1 : -1;
+
+						_window.style.height = current_height + diff + 'px';
+						// console.log(current_height + diff + 'px');
+						break;
+					default:
+						break;
 				}
 			}
-			else if (mouse_y > _window.offsetHeight - move_cursor_marge) {
-				_window.style.cursor = 'row-resize';
-				if (mouse_y > _window.offsetWidth - move_cursor_marge) {
-					// bottom
-					_window.addEventListener('mousedown', position => {
-						_window.setAttribute('data-old_mouse_y', position.layerY.toString());
-						_window.setAttribute('data-direction', 'bottom');
-					});
-					_window.addEventListener('mouseup', () => {
-						_window.removeAttribute('data-old_mouse_y');
-						_window.removeAttribute('data-direction');
-					});
-				}
+
+			_window.querySelector('.window-body').addEventListener('mouseenter', () => {
+				_window.querySelector('.window-body').addEventListener('mousemove', on_mouse_move);
+			});
+
+			window_container.append(_window);
+			window.addEventListener('resize', () => center_system_window(_window));
+			if (callback !== undefined) {
+				callback();
 			}
-			else {
-				_window.style.cursor = 'default';
-				// _window.querySelector('.window-body').removeEventListener('mousemove', on_mouse_move);
-			}
+		})(callback, _window_type);
+	}
 
-			let direction = _window.getAttribute('data-direction');
+	hide_start_menu();
+}
 
-			let diff;
-			let current_height = _window.offsetHeight;
-			let current_width = _window.offsetWidth;
-			switch (direction) {
-				case 'left':
-					console.log('left');
-					diff = e.offsetX - parseInt(_window.getAttribute('data-old_mouse_x'));
-					diff = diff > 0 ? 1 : -1;
-
-					_window.style.width = current_width - diff + 'px';
-					_window.style.left = _window.offsetLeft + diff + 'px';
-					break;
-				case 'right':
-					console.log('right');
-					diff = e.layerX - parseInt(_window.getAttribute('data-old_mouse_x'));
-					diff = diff > 0 ? 1 : -1;
-
-					_window.style.width = current_width + diff + 'px';
-					let current_right = _window.style.right.replace('px', '') === '' ? _window.style.left.replace('px', '') : _window.style.right.replace('px', '');
-					_window.style.right = parseInt(current_right) - diff + 'px';
-					break;
-				case 'bottom':
-					// console.log('bottom');
-					diff = e.layerY - parseInt(_window.getAttribute('data-old_mouse_y'));
-					diff = diff > 0 ? 1 : -1;
-
-					_window.style.height = current_height + diff + 'px';
-					console.log(current_height + diff + 'px');
-					break;
-				default:
-					break;
-			}
-		}
-
-		_window.querySelector('.window-body').addEventListener('mouseenter', () => {
-			_window.querySelector('.window-body').addEventListener('mousemove', on_mouse_move);
-		});
-
-		window_container.append(_window);
-		window.addEventListener('resize', () => center_window(_window));
-		if(callback !== undefined) {
-			callback();
-		}
-	})(callback, get_window_type(window_type));
+function center_system_window(_window) {
+	_window.style.top = ((window.innerHeight - parseInt(_window.style.height.replace('px', ''))) / 2) + 'px';
+	_window.style.left = ((window.innerWidth - parseInt(_window.style.height.replace('px', ''))) / 2) + 'px';
 }
 
 function close_system_window(_window, title) {
@@ -444,7 +582,7 @@ function minimize_system_window(_window) {
 	_window.classList.add('minimized');
 }
 
-function unminimize_system_window(_window) {
+function un_minimize_system_window(_window) {
 	_window.classList.remove('minimized');
 }
 
@@ -452,13 +590,19 @@ function maximize_system_window(_window) {
 	_window.classList.add('maximized');
 }
 
-function unmaximize_system_window(_window) {
+function un_maximize_system_window(_window) {
 	_window.classList.remove('maximized');
 }
 
 window.onload = () => {
+	if(document.querySelector('.loader') !== null) {
+		console.log(document.querySelector('.loader'));
+		document.querySelector('.loader').classList.add('hide');
+		console.log(document.querySelector('.body'));
+		document.querySelector('.body').classList.remove('hide');
+	}
 	init_desktop();
-	add_desktop_wallpaper('/images/ubuntu-wallpaper-2.jpg');
+	add_desktop_wallpaper('/images/default-wallpaper.jpg');
 	init_start_menu();
 	init_task_bar();
 };
