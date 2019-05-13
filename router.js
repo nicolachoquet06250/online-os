@@ -12,5 +12,9 @@ module.exports = [
 	{
 		route: '/settings',
 		controller_callback: require('./routes/settings')
+	},
+	{
+		route: '/filer',
+		controller_callback: require('./routes/filer')
 	}
 ];

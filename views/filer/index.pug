@@ -16,16 +16,16 @@ html(style='overflow-y: hidden;')
     body(style='margin: 0; padding: 0; background: aliceblue; padding-top: 10px;')
         div(class='container-fluid')
             div(class='row')
-                div(class='col-3 offset-3 text-center setting-icon pt-2',
-                    onclick='window.location.href="/settings/start_menu"')
-                    i(class='fa fa-newspaper', style='font-size: 40px;')
-                    br
-                    span Menu Démarrer
-                div(class='col-3 text-center setting-icon pt-2',
-                    onclick='window.location.href="/settings/me"')
-                    i(class='fa fa-user', style='font-size: 40px;')
-                    br
-                    span Mon compte
+                div(class='col-3 col-md-2 col-lg-1 filer-menu')
+                    ul
+                        li(class='home') Bureau
+                        li(class='documents') Documents
+                        li(class='images') Images
+                        li(class='musics') Musiques
+                        li(class='downloads') Téléchargements
+                        li(class='videos') Vidéos
+                        li(class='trash') Corbeille
+                div(class='col-3 col-md-2 col-lg-1 filer-body')
 
         script(src='https://code.jquery.com/jquery-3.3.1.min.js')
         script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js',
@@ -34,4 +34,4 @@ html(style='overflow-y: hidden;')
         script(src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js',
             integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM',
             crossorigin='anonymous')
-        script(src='/javascripts/script-settings.js')
+        script(src='/javascripts/script-filer.js')

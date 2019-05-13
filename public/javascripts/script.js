@@ -2,7 +2,8 @@
 
 const WINDOW_TYPE = {
 	VOID: 'void',
-	SETTINGS: 'settings'
+	SETTINGS: 'settings',
+	FILER: 'filer'
 };
 
 function get_window_type(type) {
@@ -12,6 +13,11 @@ function get_window_type(type) {
 			url: '/settings',
 			title: 'Settings',
 			logo: 'fa-user-cog'
+		},
+		filer: {
+			url: '/filer',
+			title: 'Filer',
+			logo: 'fa-folder-open'
 		}
 	};
 
@@ -552,8 +558,8 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 				}
 			}
 
-			_window.querySelector('.window-body').addEventListener('mouseenter', () => {
-				_window.querySelector('.window-body').addEventListener('mousemove', on_mouse_move);
+			_window.querySelector('.window-body iframe').addEventListener('mouseenter', () => {
+				_window.querySelector('.window-body iframe').addEventListener('mousemove', on_mouse_move);
 			});
 
 			window_container.append(_window);
@@ -595,12 +601,6 @@ function un_maximize_system_window(_window) {
 }
 
 window.onload = () => {
-	if(document.querySelector('.loader') !== null) {
-		console.log(document.querySelector('.loader'));
-		document.querySelector('.loader').classList.add('hide');
-		console.log(document.querySelector('.body'));
-		document.querySelector('.body').classList.remove('hide');
-	}
 	init_desktop();
 	add_desktop_wallpaper('/images/default-wallpaper.jpg');
 	init_start_menu();
