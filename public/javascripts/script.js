@@ -475,50 +475,51 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 			create_top_bar(_window, window_type);
 			create_window_body(_window, window_type);
 
-			function on_mouse_move(e) {
+			function on_mouse_move(e, iframe) {
 				let mouse_x = e.layerX;
 				let mouse_y = e.layerY;
 
 				let move_cursor_marge = 45;
 
 				if (mouse_x < move_cursor_marge || mouse_x > _window.offsetWidth - move_cursor_marge) {
-					_window.style.cursor = 'col-resize';
+					iframe.style.cursor = 'col-resize';
 					if (mouse_x < move_cursor_marge) {
 						// left
-						_window.addEventListener('mousedown', position => {
+						iframe.contentWindow.addEventListener('mousedown', position => {
 							_window.setAttribute('data-old_mouse_x', position.offsetX.toString());
 							_window.setAttribute('data-direction', 'left');
 						});
-						_window.addEventListener('mouseup', () => {
+						iframe.contentWindow.addEventListener('mouseup', () => {
 							_window.removeAttribute('data-old_mouse_x');
 							_window.removeAttribute('data-direction');
 						});
-					} else if (mouse_x > _window.offsetWidth - move_cursor_marge) {
+					}
+					else if (mouse_x > _window.offsetWidth - move_cursor_marge) {
 						// right
-						_window.addEventListener('mousedown', position => {
+						iframe.contentWindow.addEventListener('mousedown', position => {
 							_window.setAttribute('data-old_mouse_x', position.layerX.toString());
 							_window.setAttribute('data-direction', 'right');
 						});
-						_window.addEventListener('mouseup', () => {
+						iframe.contentWindow.addEventListener('mouseup', () => {
 							_window.removeAttribute('data-old_mouse_x');
 							_window.removeAttribute('data-direction');
 						});
 					}
 				} else if (mouse_y > _window.offsetHeight - move_cursor_marge) {
-					_window.style.cursor = 'row-resize';
+					iframe.style.cursor = 'row-resize';
 					if (mouse_y > _window.offsetWidth - move_cursor_marge) {
 						// bottom
-						_window.addEventListener('mousedown', position => {
+						iframe.contentWindow.addEventListener('mousedown', position => {
 							_window.setAttribute('data-old_mouse_y', position.layerY.toString());
 							_window.setAttribute('data-direction', 'bottom');
 						});
-						_window.addEventListener('mouseup', () => {
+						iframe.contentWindow.addEventListener('mouseup', () => {
 							_window.removeAttribute('data-old_mouse_y');
 							_window.removeAttribute('data-direction');
 						});
 					}
 				} else {
-					_window.style.cursor = 'default';
+					iframe.style.cursor = 'default';
 					// _window.querySelector('.window-body').removeEventListener('mousemove', on_mouse_move);
 				}
 
@@ -529,7 +530,6 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 				let current_width = _window.offsetWidth;
 				switch (direction) {
 					case 'left':
-						// console.log('left');
 						diff = e.offsetX - parseInt(_window.getAttribute('data-old_mouse_x'));
 						diff = diff > 0 ? 1 : -1;
 
@@ -537,11 +537,11 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 						_window.style.left = _window.offsetLeft + diff + 'px';
 						break;
 					case 'right':
-						// console.log('right');
 						diff = e.layerX - parseInt(_window.getAttribute('data-old_mouse_x'));
 						diff = diff > 0 ? 1 : -1;
 
 						_window.style.width = current_width + diff + 'px';
+						console.log(_window.style.right.replace('px', ''));
 						let current_right = _window.style.right.replace('px', '') === '' ? _window.style.left.replace('px', '') : _window.style.right.replace('px', '');
 						_window.style.right = parseInt(current_right) - diff + 'px';
 						break;
@@ -558,8 +558,9 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 				}
 			}
 
-			_window.querySelector('.window-body iframe').addEventListener('mouseenter', () => {
-				_window.querySelector('.window-body iframe').addEventListener('mousemove', on_mouse_move);
+			let iframe_body = _window.querySelector('.window-body iframe');
+			iframe_body.addEventListener('mouseenter', () => {
+				iframe_body.contentWindow.addEventListener('mousemove', e => on_mouse_move(e, iframe_body));
 			});
 
 			window_container.append(_window);
