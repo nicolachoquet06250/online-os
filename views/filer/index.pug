@@ -13,19 +13,27 @@ html(style='overflow-y: hidden;')
         link(rel='icon' href='/images/favicon.png')
         link(rel='stylesheet', href='/stylesheets/style.css')
 
-    body(style='margin: 0; padding: 0; background: aliceblue; padding-top: 10px;')
+    body(style='margin: 0; padding: 0; background: aliceblue;')
         div(class='container-fluid')
             div(class='row')
-                div(class='col-3 col-md-2 col-lg-1 filer-menu')
-                    ul
-                        li(class='home') Bureau
-                        li(class='documents') Documents
-                        li(class='images') Images
-                        li(class='musics') Musiques
-                        li(class='downloads') Téléchargements
-                        li(class='videos') Vidéos
-                        li(class='trash') Corbeille
-                div(class='col-3 col-md-2 col-lg-1 filer-body')
+                div(class='col-5 col-md-4 col-lg-3 filer-menu',
+                    style='padding-top: 10px;')
+                    details
+                        summary(class='home') Bureau
+                    details
+                        summary(class='documents') Documents
+                    details
+                        summary(class='images') Images
+                    details
+                        summary(class='musics') Musiques
+                    details
+                        summary(class='downloads') Téléchargements
+                    details
+                        summary(class='videos') Vidéos
+                    details
+                        summary(class='trash') Corbeille
+                div(class='col-7 col-md-8 col-lg-9 filer-body',
+                    style='padding-top: 10px;')
 
         script(src='https://code.jquery.com/jquery-3.3.1.min.js')
         script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js',
