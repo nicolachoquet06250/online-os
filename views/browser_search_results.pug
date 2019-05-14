@@ -1,3 +1,5 @@
-each link in links
-    a(href='http://google.com') toto
-    br
+div
+    each link in links
+        details
+            summary
+                a(href=link.url) #{link.text}

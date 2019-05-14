@@ -14,6 +14,7 @@
     "node-html-parser": "^1.1.15",
     "node-sass-middleware": "0.11.0",
     "pug": "2.0.0-beta11",
-    "request": "latest"
+    "request": "latest",
+    "cheerio": "^1.0.0-rc.3"
   }
 }
