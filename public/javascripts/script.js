@@ -1,23 +1,41 @@
 'use strict';
-
+const LOGO_TYPE = {
+	IMAGE: 'img',
+	FA: 'fa',
+	FAB: 'fab'
+};
 const WINDOW_TYPE = {
 	VOID: 'void',
 	SETTINGS: 'settings',
-	FILER: 'filer'
+	FILER: 'filer',
+	BROWSER: 'browser'
 };
 
 function get_window_type(type) {
+	let navigator_icon = (navigator.userAgent).toLowerCase().indexOf('firefox') !== -1 ?
+		'firefox' : ((navigator.userAgent).toLowerCase().indexOf('chrome') !== -1 ?
+			'chrome' : ((navigator.userAgent).toLowerCase().indexOf('safari') !== -1 ?
+				'safari' : 'columns'));
+
 	let types = {
 		void: null,
 		settings: {
 			url: '/settings',
 			title: 'Settings',
+			logo_type: LOGO_TYPE.FA,
 			logo: 'fa-user-cog'
 		},
 		filer: {
 			url: '/filer',
 			title: 'Filer',
+			logo_type: LOGO_TYPE.FA,
 			logo: 'fa-folder-open'
+		},
+		browser: {
+			url: '/browser',
+			title: 'Browser',
+			logo_type: LOGO_TYPE.FAB,
+			logo: `fa-${navigator_icon}`
 		}
 	};
 
@@ -45,6 +63,14 @@ function init_desktop() {
 	(() => {
 		size_desktop();
 		window.addEventListener('resize', size_desktop);
+		document.querySelectorAll('.fab.browser').forEach(elem => {
+			let navigator_icon = (navigator.userAgent).toLowerCase().indexOf('firefox') !== -1 ?
+				'firefox' : ((navigator.userAgent).toLowerCase().indexOf('chrome') !== -1 ?
+					'chrome' : ((navigator.userAgent).toLowerCase().indexOf('safari') !== -1 ?
+						'safari' : 'columns'));
+
+			elem.classList.add(`fa-${navigator_icon}`);
+		});
 
 		document.querySelectorAll('.window-starter').forEach(window_starter => {
 			window_starter.addEventListener('click', () => {
@@ -217,7 +243,7 @@ function create_error_window(callback, message, title) {
 }
 
 function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
-	let insert_app_into_task_bar = (_window, url_logo, title) => {
+	let insert_app_into_task_bar = (_window, logo_type, url_logo, title) => {
 		let create_id_for_app_card = (title, i = 0) => {
 			if(i > 0) {
 				if (document.querySelector('#app-launcher-' + title.replace(' ', '_').toLowerCase() + '_' + i) !== null) {
@@ -261,9 +287,9 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 		});
 
 		let app_card_logo;
-		if(url_logo.substr(0, 3) === 'fa-') {
+		if(logo_type === LOGO_TYPE.FA || logo_type === LOGO_TYPE.FAB) {
 			app_card_logo = document.createElement('div');
-			app_card_logo.classList.add('fa');
+			logo_type === LOGO_TYPE.FA ? app_card_logo.classList.add('fa') : app_card_logo.classList.add('fab');
 			app_card_logo.classList.add(url_logo);
 			app_card_logo.style.fontSize = '30px';
 			app_card_logo.style.paddingTop = '5px';
@@ -293,15 +319,15 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 		document.querySelector('.task-bar .apps-launcher').append(app_card);
 	};
 	let create_top_bar = (_window, window_type) => {
-		let create_logo = (_window, logo, url, title, callback) => {
+		let create_logo = (_window, logo, logo_type, url, title, callback) => {
 			logo.style.position = 'absolute';
 			logo.style.left = '0';
 
 			let img;
-			if(window_type.logo.substr(0, 3) === 'fa-') {
+			if(logo_type === LOGO_TYPE.FA || logo_type === LOGO_TYPE.FAB) {
 				img = document.createElement('div');
-				img.classList.add('fa');
-				img.classList.add(window_type.logo);
+				logo_type === LOGO_TYPE.FA ? img.classList.add('fa') : img.classList.add('fab');
+				img.classList.add(url);
 				img.style.fontSize = '30px';
 				img.style.paddingTop = '5px';
 				img.style.paddingLeft = '5px';
@@ -401,7 +427,7 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 
 		let logo = document.createElement('div');
 
-		create_logo(_window, logo, window_type.logo, title);
+		create_logo(_window, logo, window_type.logo_type, window_type.logo, title);
 		create_minimize_btn(_window, buttons, minimize_system_window, title);
 		create_maximize_btn(_window, buttons, _window =>
 			_window.classList.contains('maximized') ? un_maximize_system_window(_window) : maximize_system_window(_window), title);
@@ -443,7 +469,7 @@ function create_system_window(callback, window_type = WINDOW_TYPE.VOID) {
 			top_bar.removeEventListener('mousemove', callback_mousemove);
 		});
 
-		insert_app_into_task_bar(_window, window_type.logo, title);
+		insert_app_into_task_bar(_window, window_type.logo_type, window_type.logo, title);
 	};
 	let create_window_body = (_window, window_type) => {
 		let body = document.createElement('div');
